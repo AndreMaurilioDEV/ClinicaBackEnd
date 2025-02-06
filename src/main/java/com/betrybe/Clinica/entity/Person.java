@@ -27,6 +27,8 @@ public class Person implements UserDetails {
 
   private Boolean isConfirmed = false;
 
+  private String resetToken;
+
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
@@ -34,17 +36,26 @@ public class Person implements UserDetails {
   public Person() {
   }
 
-  public Person(String username, String password, Role role, String name, Boolean isConfirmed) {
+  public Person(String username, String password, Role role, String name, Boolean isConfirmed, String resetToken) {
     this.username = username;
     this.password = password;
     this.role = role;
     this.name = name;
     this.isConfirmed = isConfirmed;
+    this.resetToken = resetToken;
   }
 
   @PrePersist
   public void prePersist() {
     this.createdAt = LocalDateTime.now();
+  }
+
+  public String getResetToken() {
+    return resetToken;
+  }
+
+  public void setResetToken(String resetToken) {
+    this.resetToken = resetToken;
   }
 
   public Long getId() {

@@ -38,12 +38,6 @@ public class MedicoService {
       throw new IllegalArgumentException("Nome é obrigatório!");
     }
 
-    /*if (imageFile != null && !imageFile.isEmpty()) {
-      medico.setImageName(imageFile.getOriginalFilename());
-      medico.setImageType(imageFile.getContentType());
-      medico.setImageData(imageFile.getBytes());
-    }*/
-
     return medicoRepository.save(medico);
   }
 

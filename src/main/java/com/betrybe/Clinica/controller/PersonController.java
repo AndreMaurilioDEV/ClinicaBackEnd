@@ -52,18 +52,20 @@ public class PersonController {
     return PersonDto.fromEntity(personService.createPerson(person, Role.EMPLOYEE));
   }
 
-  @PostMapping("/admins")
-  @ResponseStatus(HttpStatus.CREATED)
-  public PersonDto createNewAdmin(@RequestBody PersonCreationDto personCreationDto)
-          throws PersonAlreadyExists {
-    Person person = new Person(personCreationDto.username(), personCreationDto.name(), null, null, null);
-    return PersonDto.fromEntity(personService.createPerson(person, Role.ADMIN));
+  @PostMapping("/forgot-password")
+  public PersonDto forgotPassword(@RequestBody PasswordResetRequest request) throws PersonNotFoundException {
+    return  PersonDto.fromEntity(personService.generateResetToken(request.email()));
   }
 
-  @PutMapping("/{id}/change-password")
-  public ResponseEntity<Void> updatePerson(@PathVariable Long id, @RequestBody PasswordChangeDto passwordChangeDto)
+  @PostMapping("/reset-password")
+  public PersonDto resetPassword(@RequestBody PasswordResetDto request) throws PersonNotFoundException {
+    return  PersonDto.fromEntity(personService.changePassword(request.token(),request.email()));
+  }
+
+  @PutMapping("/change-password")
+  public ResponseEntity<Void> updatePassword(@RequestParam Long id, @RequestParam String currentPassword, @RequestParam String newPassword)
           throws PersonNotFoundException {
-    personService.updatePassword(id, passwordChangeDto.newPassword());
+    personService.updatePassword(id, newPassword, currentPassword);
     return ResponseEntity.noContent().build();
   }
 

@@ -76,13 +76,6 @@ public class ConsultaService {
     return consultaRepository.save(consultaFromBD);
   }
 
-  public Consulta deleteConsulta(Long id) throws ConsultaNotFoundException {
-    Consulta consultaFromBD = findById(id);
-    consultaRepository.deleteById(id);
-    return consultaFromBD;
-  }
-
-
   public Consulta removeConsulta(Long id) throws ConsultaNotFoundException {
     Consulta consultaFromDB = findById(id);
     consultaRepository.deleteById(id);
@@ -110,6 +103,5 @@ public class ConsultaService {
     consultaFromDB.setMedicos(medicoFromDB);
     return consultaRepository.save(consultaFromDB);
   }
-
 
 }

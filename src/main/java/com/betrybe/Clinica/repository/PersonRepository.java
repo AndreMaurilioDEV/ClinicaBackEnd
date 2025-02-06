@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface PersonRepository extends JpaRepository<Person, Long> {
     Optional<Person> findByUsername(String username);
     Optional<List<Person>> findByRole(Role role);
+    Optional<Person> findByResetToken(String resetToken);
 }
