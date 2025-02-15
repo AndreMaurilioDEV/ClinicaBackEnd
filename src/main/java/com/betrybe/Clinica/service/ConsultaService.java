@@ -88,20 +88,5 @@ public class ConsultaService {
     return consultaRepository.save(consulta);
   }
 
-  public Consulta editConsultaPaciente(Long idConsulta, Long idPaciente) throws
-          ConsultaNotFoundException, PacienteNotFoundException {
-    Consulta consultafromDB = findById(idConsulta);
-    Paciente pacienteFromDB = pacienteService.findById(idPaciente);
-    consultafromDB.setPacientes(pacienteFromDB);
-    return consultaRepository.save(consultafromDB);
-  }
-
-  public Consulta editConsultaMedico(Long idConsulta, Long idMedico) throws
-          ConsultaNotFoundException, MedicoNotFoundException {
-    Consulta consultaFromDB = findById(idConsulta);
-    Medico medicoFromDB = medicoService.findById(idMedico);
-    consultaFromDB.setMedicos(medicoFromDB);
-    return consultaRepository.save(consultaFromDB);
-  }
 
 }

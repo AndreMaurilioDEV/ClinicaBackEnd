@@ -2,7 +2,9 @@ package com.betrybe.Clinica;
 
 import com.betrybe.Clinica.service.AdminService;
 import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AdminInitializer {
 
   private final AdminService adminService;

@@ -9,6 +9,7 @@ import com.betrybe.Clinica.service.expections.PacienteAlreadyExistsException;
 import com.betrybe.Clinica.service.expections.PacienteNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,13 +26,13 @@ public class PacienteController {
   }
 
   @GetMapping
-  public List<PacienteDto> getAll() throws PacienteNotFoundException {
+  public List<PacienteDto> listAllPacientes() throws PacienteNotFoundException {
     List<Paciente> allPacientes = pacienteService.findAll();
     return allPacientes.stream().map(PacienteDto::fromEntity).toList();
   }
 
   @GetMapping("/{idPaciente}")
-  public PacienteDto getById(@PathVariable Long idPaciente) throws PacienteNotFoundException {
+  public PacienteDto listByID(@PathVariable Long idPaciente) throws PacienteNotFoundException {
     return PacienteDto.fromEntity(pacienteService.findById(idPaciente));
   }
 
@@ -50,8 +51,9 @@ public class PacienteController {
   }
 
   @DeleteMapping("/{idPaciente}")
-  public PacienteDto deleteMedico(@PathVariable Long idPaciente) throws PacienteNotFoundException {
-    return PacienteDto.fromEntity(pacienteService.deletePaciente(idPaciente));
+  public ResponseEntity<Void> deletePaciente(@PathVariable Long idPaciente) throws PacienteNotFoundException {
+    pacienteService.deletePaciente(idPaciente);
+    return ResponseEntity.status(204).body(null);
   }
 
   @PutMapping("/status-update/{idPaciente}")

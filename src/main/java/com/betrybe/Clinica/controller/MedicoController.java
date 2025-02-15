@@ -7,6 +7,7 @@ import com.betrybe.Clinica.service.MedicoService;
 import com.betrybe.Clinica.service.expections.MedicoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -24,13 +25,13 @@ public class MedicoController {
   }
 
   @GetMapping
-  public List<MedicoDto> getAll() throws MedicoNotFoundException {
+  public List<MedicoDto> listAllMedicos() throws MedicoNotFoundException {
     List<Medico> allMedicos = medicoService.findAll();
     return allMedicos.stream().map(MedicoDto::fromEntity).toList();
   }
 
   @GetMapping("/{idMedico}")
-  public MedicoDto getById(@PathVariable Long idMedico) throws MedicoNotFoundException {
+  public MedicoDto listByID(@PathVariable Long idMedico) throws MedicoNotFoundException {
     return MedicoDto.fromEntity(medicoService.findById(idMedico));
   }
 
@@ -50,7 +51,8 @@ public class MedicoController {
   }
 
   @DeleteMapping("/{id}")
-  public MedicoDto deleteMedico(@PathVariable("id") Long id) throws MedicoNotFoundException {
-    return MedicoDto.fromEntity(medicoService.deleteMedico(id));
+  public ResponseEntity<Void> deleteMedico(@PathVariable("id") Long id) throws MedicoNotFoundException {
+    medicoService.deleteMedico(id);
+    return ResponseEntity.status(204).body(null);
   }
 }

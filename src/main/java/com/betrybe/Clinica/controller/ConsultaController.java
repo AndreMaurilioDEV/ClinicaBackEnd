@@ -11,8 +11,10 @@ import com.betrybe.Clinica.service.expections.ConsultaNotFoundException;
 import com.betrybe.Clinica.service.expections.MedicoNotFoundException;
 import com.betrybe.Clinica.service.expections.PacienteNotFoundException;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -37,13 +39,13 @@ public class ConsultaController {
   }
 
   @GetMapping
-  public List<ConsultaDto> getAll() throws ConsultaNotFoundException {
+  public List<ConsultaDto> listAllConsulta() throws ConsultaNotFoundException {
     List<Consulta> allConsultas = consultaService.findAll();
     return allConsultas.stream().map(ConsultaDto::fromEntity).toList();
   }
 
   @GetMapping("/{consultaId}")
-  public ConsultaDto getConsultaById(@PathVariable Long consultaId) throws ConsultaNotFoundException {
+  public ConsultaDto listByID(@PathVariable Long consultaId) throws ConsultaNotFoundException {
     return ConsultaDto.fromEntity(consultaService.findById(consultaId));
   }
 
@@ -54,36 +56,16 @@ public class ConsultaController {
   }
 
   @DeleteMapping("/{idConsulta}")
-  public ConsultaDto deleteConsulta(@PathVariable Long idConsulta) throws ConsultaNotFoundException {
-    return ConsultaDto.fromEntity(consultaService.removeConsulta(idConsulta));
+  public ResponseEntity<Void> deleteConsulta(@PathVariable Long idConsulta) throws ConsultaNotFoundException {
+    consultaService.removeConsulta(idConsulta);
+    return ResponseEntity.status(204).body(null);
   }
 
   @PutMapping("/status-consulta/{idConsulta}")
-  public ConsultaDto updateConsultaStatus(@PathVariable Long idConsulta, @RequestBody @Valid ConsultaDto consulta)
+  public ResponseEntity<Void> updateConsultaStatus(@PathVariable Long idConsulta, @RequestBody @Valid ConsultaDto consulta)
     throws ConsultaNotFoundException {
-      return ConsultaDto.fromEntity(consultaService.updateStatus(idConsulta, consulta.status()));
+      consultaService.updateStatus(idConsulta, consulta.status());
+      return ResponseEntity.status(204).body(null);
   }
-
-  @PutMapping("/{idConsulta}/paciente/{idPaciente}")
-  public ConsultaDto updateConsultaPaciente(@PathVariable Long idConsulta, Long idPaciente) throws
-          PacienteNotFoundException, ConsultaNotFoundException {
-    return ConsultaDto.fromEntity(consultaService.editConsultaPaciente(idConsulta, idPaciente));
-  }
-
-  @PutMapping("/{idConsulta}/medico/{idMedico}")
-  public ConsultaDto updateConsultaMedico(@PathVariable Long idConsulta, Long idMedico) throws
-          PacienteNotFoundException, ConsultaNotFoundException {
-    return ConsultaDto.fromEntity(consultaService.editConsultaPaciente(idConsulta, idMedico));
-  }
-
-  @PutMapping("/{idConsulta}/editar-consulta")
-  public ConsultaDto updateConsulta(@PathVariable Long idConsulta, @RequestBody ConsultaCreationDto consultaCreationDto)
-          throws MedicoNotFoundException, PacienteNotFoundException, ConsultaNotFoundException {
-    Medico medico = medicoRepository.findById(consultaCreationDto.medicoIds()).orElseThrow(MedicoNotFoundException::new);
-    Paciente paciente = pacienteRepository.findById(consultaCreationDto.pacienteIds()).orElseThrow(PacienteNotFoundException::new);
-    return ConsultaDto.fromEntity(consultaService.updateConsulta(idConsulta, consultaCreationDto.toEntity(medico, paciente)));
-  }
-
-
 
 }

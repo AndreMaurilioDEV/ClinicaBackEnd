@@ -1,13 +1,12 @@
 package com.betrybe.Clinica.service;
 
 import com.betrybe.Clinica.entity.Person;
-import com.betrybe.Clinica.repository.ConfirmacaoRepository;
 import com.betrybe.Clinica.repository.PersonRepository;
 import com.betrybe.Clinica.security.Role;
-import com.betrybe.Clinica.service.expections.InvalidToken;
 import com.betrybe.Clinica.service.expections.PersonAlreadyExists;
 import com.betrybe.Clinica.service.expections.PersonNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -16,25 +15,24 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class PersonService implements UserDetailsService {
 
   private final PersonRepository personRepository;
-  private final ConfirmacaoRepository confirmacaoRepository;
 
   @Autowired
   private EmailService emailService;
 
   @Autowired
-  public PersonService(PersonRepository personRepository, ConfirmacaoRepository confirmacaoRepository) {
+  public PersonService(PersonRepository personRepository) {
     this.personRepository = personRepository;
-    this.confirmacaoRepository = confirmacaoRepository;
   }
 
   public Person findById(Long id) throws PersonNotFoundException {
@@ -61,56 +59,42 @@ public class PersonService implements UserDetailsService {
     if(this.personRepository.findByUsername(person.getUsername()).isPresent()) {
         throw new PersonAlreadyExists();
     }
-
     String tempPassword = UUID.randomUUID().toString().substring(0,8);
     String hashedPassword = new BCryptPasswordEncoder()
             .encode(tempPassword);
-
     System.out.println("Senha temporária: " + tempPassword);
     System.out.println("Senha hash: " + hashedPassword);
-
     person.setPassword(hashedPassword);
     person.setRole(role);
     person.setIsConfirmed(false);
-
     personRepository.save(person);
-
     emailService.sendEmail(person.getUsername(),
             "Novo Cadastro Efetuado",
             "<h3>Ola," + person.getName() + "você está recebendo um email de cadastro</h3>" +
                     " <p>Use a senha aleatória" + tempPassword + " para efetuar o primeiro login. </p>" +
-                    "<p><strong>Após isso, faça a alteração da senha nas configurações da sua conta, se preferir.</strong></p>"
+                    "<p><strong>Após isso, faça a alteração da senha nas configurações da sua conta.</strong></p>"
     );
     return person;
   }
 
   public Person generateResetToken(String email) throws PersonNotFoundException{
     Person person = personRepository.findByUsername(email).orElseThrow(PersonNotFoundException::new);
+    if (person.getLastResetRequest().plusMinutes(2).isBefore(LocalDateTime.now())) {
+      throw new ResponseStatusException(HttpStatus.GONE, "O código expirou.");
+    }
     String resetToken = UUID.randomUUID().toString().substring(0,6);
     person.setResetToken(resetToken);
     personRepository.save(person);
-    String resetLink = "https://.com/redefinir-senha?token=" + resetToken;
-    emailService.sendEmail(person.getUsername(),
-            "Redefinição de Senha",
-            "<h3>Olá, " + person.getName() + "</h3>" +
-                    "<p>Você solicitou a redefinição da sua senha.</p>" +
-                    "<p><strong>Clique no botão abaixo para redefinir sua senha:</strong></p>" +
-                    "<a href='" + resetLink + "' " +
-                    "style='display: inline-block; padding: 10px 20px; font-size: 16px; " +
-                    "color: white; background-color: #28a745; text-decoration: none; border-radius: 5px;'>Redefinir Senha</a>" +
-                    "<p>Se você não solicitou essa alteração, ignore este e-mail.</p>"
-    );
-
+    sendRecoveryEmail(person, person.getResetToken());
     return person;
   }
 
 
-  public Person updatePassword(Long id, String newPassword, String currentPassword) throws PersonNotFoundException {
-    Person personFromDB = findById(id);
+  public Person updatePassword(String email, String newPassword, String currentPassword) throws PersonNotFoundException {
+    Person personFromDB = findByEmail(email);
     if (!new BCryptPasswordEncoder().matches(currentPassword, personFromDB.getPassword())) {
       throw new IllegalArgumentException("Senha atual não está correta.");
     }
-
     if (newPassword == null || newPassword.length() < 8) {
       throw new IllegalArgumentException("A senha deve ter pelo menos 8 caracteres.");
     }
@@ -129,16 +113,26 @@ public class PersonService implements UserDetailsService {
   public Person changePassword(String token, String newPassword) throws PersonNotFoundException {
     Person person = personRepository.findByResetToken(token)
             .orElseThrow(() -> new IllegalArgumentException("Token inválido ou expirado"));
-
     if (newPassword == null || newPassword.length() < 8) {
       throw new IllegalArgumentException("A senha deve ter pelo menos 8 caracteres.");
     }
-
     String hashedPassword = new BCryptPasswordEncoder().encode(newPassword);
     person.setPassword(hashedPassword);
     person.setResetToken(null);
-
     return personRepository.save(person);
+  }
+
+  private void sendRecoveryEmail(Person person, String token) {
+      String resetLink = "http://localhost:5173/verificacao";
+      String message = "<h3>Olá, " + person.getName() + "</h3>" +
+              "<p>Você solicitou a redefinição da sua senha.</p>" +
+              "<p>Use o código de confirmação" + token + " para redefinir a senha</p>" +
+              "<p><strong>Clique no botão abaixo para redefinir sua senha:</strong></p>" +
+              "<a href='" + resetLink + "' " +
+              "style='display: inline-block; padding: 10px 20px; font-size: 16px; " +
+              "color: white; background-color: #28a745; text-decoration: none; border-radius: 5px;'>Redefinir Senha</a>" +
+              "<p>Se você não solicitou essa alteração, ignore este e-mail.</p>";
+      emailService.sendEmail(person.getUsername(), "Confirmar Redefinição de senha", message);
   }
 
 

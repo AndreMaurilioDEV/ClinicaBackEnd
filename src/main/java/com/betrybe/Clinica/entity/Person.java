@@ -32,6 +32,7 @@ public class Person implements UserDetails {
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
+  private LocalDateTime lastResetRequest;
 
   public Person() {
   }
@@ -48,6 +49,19 @@ public class Person implements UserDetails {
   @PrePersist
   public void prePersist() {
     this.createdAt = LocalDateTime.now();
+    this.lastResetRequest = LocalDateTime.now();
+  }
+
+  public void updateLastResetRequest() {
+    this.lastResetRequest = LocalDateTime.now();
+  }
+
+  public LocalDateTime getLastResetRequest() {
+    return lastResetRequest;
+  }
+
+  public void setLastResetRequest(LocalDateTime lastResetRequest) {
+    this.lastResetRequest = lastResetRequest;
   }
 
   public String getResetToken() {
