@@ -5,6 +5,7 @@ import com.betrybe.Clinica.controller.dto.MedicoDto;
 import com.betrybe.Clinica.entity.Medico;
 import com.betrybe.Clinica.service.MedicoService;
 import com.betrybe.Clinica.service.expections.MedicoNotFoundException;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,34 +26,36 @@ public class MedicoController {
   }
 
   @GetMapping
-  public List<MedicoDto> listAllMedicos() throws MedicoNotFoundException {
+  public ResponseEntity<List<MedicoDto>> listAllMedicos() throws MedicoNotFoundException {
     List<Medico> allMedicos = medicoService.findAll();
-    return allMedicos.stream().map(MedicoDto::fromEntity).toList();
+    List<MedicoDto> medicoDtos = allMedicos.stream().map(MedicoDto::fromEntity).toList();
+    return ResponseEntity.ok(medicoDtos);
   }
 
   @GetMapping("/{idMedico}")
-  public MedicoDto listByID(@PathVariable Long idMedico) throws MedicoNotFoundException {
-    return MedicoDto.fromEntity(medicoService.findById(idMedico));
+  public ResponseEntity<MedicoDto> listByID(@PathVariable Long idMedico) throws MedicoNotFoundException {
+    MedicoDto medicoDto = MedicoDto.fromEntity(medicoService.findById(idMedico));
+    return ResponseEntity.ok(medicoDto);
   }
 
   @PostMapping
-  @ResponseStatus(HttpStatus.CREATED)
-  public MedicoDto createMedico(@RequestBody MedicoCreationDto medicoCreationDto)
+  public ResponseEntity<MedicoDto> createMedico(@RequestBody MedicoCreationDto medicoCreationDto)
           throws MedicoNotFoundException, IOException {
     Medico medico = medicoCreationDto.toEntity();
     Medico savedMedico = medicoService.createNewMedico(medico);
-    return MedicoDto.fromEntity(savedMedico);
+    return ResponseEntity.status(HttpStatus.CREATED).body(MedicoDto.fromEntity(savedMedico));
   }
 
   @PutMapping("/{id}")
-  public MedicoDto updateMedico(@PathVariable Long idMedico, @RequestBody MedicoCreationDto medicoCreationDto)
+  public ResponseEntity<Void> updateMedico(@PathVariable Long idMedico, @RequestBody MedicoCreationDto medicoCreationDto)
     throws  MedicoNotFoundException {
-    return MedicoDto.fromEntity(medicoService.updateMedico(idMedico, medicoCreationDto.toEntity()));
+    medicoService.updateMedico(idMedico, medicoCreationDto.toEntity());
+    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteMedico(@PathVariable("id") Long id) throws MedicoNotFoundException {
     medicoService.deleteMedico(id);
-    return ResponseEntity.status(204).body(null);
+    return ResponseEntity.noContent().build();
   }
 }

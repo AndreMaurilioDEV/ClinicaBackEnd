@@ -3,6 +3,7 @@ package com.betrybe.Clinica.service;
 import com.betrybe.Clinica.entity.Person;
 import com.betrybe.Clinica.repository.PersonRepository;
 import com.betrybe.Clinica.security.Role;
+import com.betrybe.Clinica.service.expections.EmailNotFound;
 import com.betrybe.Clinica.service.expections.PersonAlreadyExists;
 import com.betrybe.Clinica.service.expections.PersonNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,6 @@ public class PersonService implements UserDetailsService {
     return personFromRepository;
   }
 
-
   public Person createPerson(Person person, Role role) throws PersonAlreadyExists {
     if(this.personRepository.findByUsername(person.getUsername()).isPresent()) {
         throw new PersonAlreadyExists();
@@ -62,33 +62,22 @@ public class PersonService implements UserDetailsService {
     String tempPassword = UUID.randomUUID().toString().substring(0,8);
     String hashedPassword = new BCryptPasswordEncoder()
             .encode(tempPassword);
-    System.out.println("Senha temporária: " + tempPassword);
-    System.out.println("Senha hash: " + hashedPassword);
     person.setPassword(hashedPassword);
     person.setRole(role);
     person.setIsConfirmed(false);
     personRepository.save(person);
-    emailService.sendEmail(person.getUsername(),
-            "Novo Cadastro Efetuado",
-            "<h3>Ola," + person.getName() + "você está recebendo um email de cadastro</h3>" +
-                    " <p>Use a senha aleatória" + tempPassword + " para efetuar o primeiro login. </p>" +
-                    "<p><strong>Após isso, faça a alteração da senha nas configurações da sua conta.</strong></p>"
-    );
+    sendCreateAccountEmail(person, tempPassword);
     return person;
   }
 
-  public Person generateResetToken(String email) throws PersonNotFoundException{
-    Person person = personRepository.findByUsername(email).orElseThrow(PersonNotFoundException::new);
-    if (person.getLastResetRequest().plusMinutes(2).isBefore(LocalDateTime.now())) {
-      throw new ResponseStatusException(HttpStatus.GONE, "O código expirou.");
-    }
+  public Person generateResetToken(String email) throws EmailNotFound {
+    Person person = personRepository.findByUsername(email).orElseThrow(EmailNotFound::new);
     String resetToken = UUID.randomUUID().toString().substring(0,6);
     person.setResetToken(resetToken);
     personRepository.save(person);
     sendRecoveryEmail(person, person.getResetToken());
     return person;
   }
-
 
   public Person updatePassword(String email, String newPassword, String currentPassword) throws PersonNotFoundException {
     Person personFromDB = findByEmail(email);
@@ -101,18 +90,13 @@ public class PersonService implements UserDetailsService {
     String hashedPassword = new BCryptPasswordEncoder().encode(newPassword);
     personFromDB.setPassword(hashedPassword);
     personFromDB.setIsConfirmed(true);
-    emailService.sendEmail(personFromDB.getUsername(),
-            "Senha alterada com sucesso",
-            "<h3>Olá,"+ personFromDB.getName() + "</h3>"+
-                      "<p>Você alterou sua senha com sucesso.</p>" +
-                      "<p>Se não foi você, entre em contato com o suporte imediatamente.</p>"
-            );
+    sendUpdatePasswordEmail(personFromDB);
     return personRepository.save(personFromDB);
   }
 
-  public Person changePassword(String token, String newPassword) throws PersonNotFoundException {
+  public Person changePassword(String token, String newPassword) {
     Person person = personRepository.findByResetToken(token)
-            .orElseThrow(() -> new IllegalArgumentException("Token inválido ou expirado"));
+            .orElseThrow(() -> new IllegalArgumentException("Código expirado"));
     if (newPassword == null || newPassword.length() < 8) {
       throw new IllegalArgumentException("A senha deve ter pelo menos 8 caracteres.");
     }
@@ -120,6 +104,15 @@ public class PersonService implements UserDetailsService {
     person.setPassword(hashedPassword);
     person.setResetToken(null);
     return personRepository.save(person);
+  }
+
+  public Person validateTokenReset(String token) {
+    Person person = personRepository.findByResetToken(token).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código inválido!!"));
+    if (person.getLastResetRequest().plusMinutes(2).isBefore(LocalDateTime.now())) {
+      throw new ResponseStatusException(HttpStatus.GONE, "O código expirou, solicite novamente!!");
+    }
+   return person;
   }
 
   private void sendRecoveryEmail(Person person, String token) {
@@ -135,6 +128,19 @@ public class PersonService implements UserDetailsService {
       emailService.sendEmail(person.getUsername(), "Confirmar Redefinição de senha", message);
   }
 
+  private void sendCreateAccountEmail(Person person, String tempPassword) {
+      String message = "<h3>Ola," + person.getName() + "você está recebendo um email de cadastro</h3>" +
+              " <p>Use a senha aleatória" + tempPassword + " para efetuar o primeiro login. </p>" +
+              "<p><strong>Após isso, faça a alteração da senha nas configurações da sua conta.</strong></p>";
+      emailService.sendEmail(person.getUsername(), "Novo Cadastro", message);
+  }
+
+  private void sendUpdatePasswordEmail(Person person) {
+    String message = "<h3>Olá,"+ person.getName() + "</h3>"+
+            "<p>Você alterou sua senha com sucesso.</p>" +
+            "<p>Se não foi você, entre em contato com o suporte imediatamente.</p>";
+    emailService.sendEmail(person.getUsername(), "Senha Alterada", message);
+  }
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

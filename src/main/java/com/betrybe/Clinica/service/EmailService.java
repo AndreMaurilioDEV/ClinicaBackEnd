@@ -1,5 +1,6 @@
 package com.betrybe.Clinica.service;
 
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -27,8 +28,8 @@ public class EmailService {
       helper.setText(mensagem, true);
       mailSender.send(mimeMessage);
       return "Email enviado com sucesso";
-    } catch(Exception e) {
-      return "Erro ao tentar enviar email " + e.getLocalizedMessage();
+    } catch(MessagingException e) {
+      throw new IllegalStateException("Falha ao enviar e-mail", e);
     }
   }
 }

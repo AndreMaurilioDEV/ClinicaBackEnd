@@ -26,39 +26,43 @@ public class PacienteController {
   }
 
   @GetMapping
-  public List<PacienteDto> listAllPacientes() throws PacienteNotFoundException {
+  public ResponseEntity<List<PacienteDto>> listAllPacientes() throws PacienteNotFoundException {
     List<Paciente> allPacientes = pacienteService.findAll();
-    return allPacientes.stream().map(PacienteDto::fromEntity).toList();
+    List<PacienteDto> pacienteDtos = allPacientes.stream().map(PacienteDto::fromEntity).toList();
+    return ResponseEntity.ok(pacienteDtos);
   }
 
   @GetMapping("/{idPaciente}")
-  public PacienteDto listByID(@PathVariable Long idPaciente) throws PacienteNotFoundException {
-    return PacienteDto.fromEntity(pacienteService.findById(idPaciente));
+  public ResponseEntity<PacienteDto> listByID(@PathVariable Long idPaciente) throws PacienteNotFoundException {
+    PacienteDto pacienteDto = PacienteDto.fromEntity(pacienteService.findById(idPaciente));
+    return ResponseEntity.ok(pacienteDto);
   }
 
   @PostMapping
-  @ResponseStatus(HttpStatus.CREATED)
-  public PacienteDto createPaciente(@RequestBody PacienteCreationDto pacienteCreationDto) throws PacienteNotFoundException, InvalidCpfException, PacienteAlreadyExistsException {
+  public ResponseEntity<PacienteDto> createPaciente(@RequestBody PacienteCreationDto pacienteCreationDto) throws
+          InvalidCpfException, PacienteAlreadyExistsException {
     Paciente paciente = pacienteCreationDto.toEntity();
     Paciente savedPaciente = pacienteService.createPaciente(paciente);
-    return PacienteDto.fromEntity(savedPaciente);
+    return ResponseEntity.status(HttpStatus.CREATED).body(PacienteDto.fromEntity(savedPaciente));
   }
 
   @PutMapping("/{idPaciente}")
-  public PacienteDto updatePaciente(@PathVariable Long idPaciente, @RequestBody PacienteCreationDto pacienteCreationDto)
+  public ResponseEntity<Void> updatePaciente(@PathVariable Long idPaciente, @RequestBody PacienteCreationDto pacienteCreationDto)
           throws  PacienteNotFoundException {
-    return PacienteDto.fromEntity(pacienteService.updatePaciente(idPaciente, pacienteCreationDto.toEntity()));
+    PacienteDto.fromEntity(pacienteService.updatePaciente(idPaciente, pacienteCreationDto.toEntity()));
+    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{idPaciente}")
   public ResponseEntity<Void> deletePaciente(@PathVariable Long idPaciente) throws PacienteNotFoundException {
     pacienteService.deletePaciente(idPaciente);
-    return ResponseEntity.status(204).body(null);
+    return ResponseEntity.noContent().build();
   }
 
   @PutMapping("/status-update/{idPaciente}")
-  public PacienteDto updateStatusPaciente(@PathVariable Long idPaciente)
+  public ResponseEntity<Void> updateStatusPaciente(@PathVariable Long idPaciente)
           throws PacienteNotFoundException {
-    return PacienteDto.fromEntity(pacienteService.updateStatusPaciente(idPaciente));
+    PacienteDto.fromEntity(pacienteService.updateStatusPaciente(idPaciente));
+    return ResponseEntity.noContent().build();
   }
 }

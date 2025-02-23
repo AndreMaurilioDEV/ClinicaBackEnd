@@ -31,29 +31,32 @@ public class PersonController {
   }
 
   @GetMapping
-  public List<PersonDto> listAll() throws PersonNotFoundException {
+  public ResponseEntity<List<PersonDto>> listAll() throws PersonNotFoundException {
     List<Person> allPersons = personService.findAll();
-    return allPersons.stream().map(PersonDto::fromEntity).toList();
+    List<PersonDto> personDtos = allPersons.stream().map(PersonDto::fromEntity).toList();
+    return ResponseEntity.ok(personDtos);
   }
 
   @DeleteMapping("/{idPerson}")
-  public ResponseEntity<Void> removePerson(@PathVariable Long idPerson) {
-    return ResponseEntity.status(204).body(null);
+  public ResponseEntity<Void> removePerson(@PathVariable Long idPerson) throws PersonNotFoundException {
+    personService.removePerson(idPerson);
+    return ResponseEntity.noContent().build();
   }
 
   
   @GetMapping("/user-details/{username}")
   @Secured("ROLE_EMPLOYEE")
-  public PersonDto listByEmail(@PathVariable String username) throws PersonNotFoundException {
-    return PersonDto.fromEntity(personService.findByEmail(username));
+  public ResponseEntity<PersonDto> listByEmail(@PathVariable String username) throws PersonNotFoundException {
+    PersonDto personDto = PersonDto.fromEntity(personService.findByEmail(username));
+    return ResponseEntity.ok(personDto);
   }
 
   @PostMapping("/employees")
-  @ResponseStatus(HttpStatus.CREATED)
-  public PersonDto createNewEmployee(@RequestBody PersonCreationDto personCreationDto)
+  public ResponseEntity<PersonDto> createNewEmployee(@RequestBody PersonCreationDto personCreationDto)
           throws PersonAlreadyExists {
     Person person = personCreationDto.toEntity();
-    return PersonDto.fromEntity(personService.createPerson(person, Role.EMPLOYEE));
+    Person savePerson = personService.createPerson(person, Role.EMPLOYEE);
+    return ResponseEntity.status(HttpStatus.CREATED).body(PersonDto.fromEntity(savePerson));
   }
 
 

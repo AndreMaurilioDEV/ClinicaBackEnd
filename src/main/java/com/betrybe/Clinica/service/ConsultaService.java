@@ -12,9 +12,12 @@ import com.betrybe.Clinica.service.expections.ConsultaNotFoundException;
 import com.betrybe.Clinica.service.expections.MedicoNotFoundException;
 import com.betrybe.Clinica.service.expections.PacienteNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ConsultaService {
@@ -44,18 +47,24 @@ public class ConsultaService {
   public Consulta createConsulta(ConsultaCreationDto consultaDto)
           throws MedicoNotFoundException, PacienteNotFoundException {
 
+    boolean exists = consultaRepository.existsByHorarioAndDateTime(consultaDto.horario(), consultaDto.date());
+    if (exists) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Já existe um atendimento nesse horário e data");
+    }
     Consulta consulta = new Consulta();
     consulta.setHorario(consultaDto.horario());
     consulta.setDateTime(consultaDto.date());
     consulta.setStatus(consultaDto.status());
     consulta.setTipoAtendimento(consultaDto.tipoAtendimento());
 
-      Medico medico = medicoService.findById(consultaDto.medicoIds());
-      if (medico == null) {
-        throw new MedicoNotFoundException();
-      }
+    // Buscar o médico pelo ID
+    Medico medico = medicoService.findById(consultaDto.medicoIds());
+    if (medico == null) {
+      throw new MedicoNotFoundException();
+    }
       consulta.setMedicos(medico);
 
+    // Buscar o paciente pelo ID
       Paciente paciente = pacienteService.findById(consultaDto.pacienteIds());
       if (paciente == null) {
         throw new PacienteNotFoundException();
@@ -66,14 +75,14 @@ public class ConsultaService {
   }
 
   public Consulta updateConsulta(Long id, Consulta consulta) throws ConsultaNotFoundException {
-    Consulta consultaFromBD = findById(id);
-    consultaFromBD.setHorario(consulta.getHorario());
-    consultaFromBD.setDateTime(consulta.getDateTime());
-    consultaFromBD.setPacientes(consulta.getPacientes());
-    consultaFromBD.setMedicos(consulta.getMedicos());
-    consultaFromBD.setStatus(consulta.getStatus());
-    consultaFromBD.setTipoAtendimento(consulta.getTipoAtendimento());
-    return consultaRepository.save(consultaFromBD);
+    Consulta consultaToEdit = findById(id);
+    consultaToEdit.setHorario(consulta.getHorario());
+    consultaToEdit.setDateTime(consulta.getDateTime());
+    consultaToEdit.setPacientes(consulta.getPacientes());
+    consultaToEdit.setMedicos(consulta.getMedicos());
+    consultaToEdit.setStatus(consulta.getStatus());
+    consultaToEdit.setTipoAtendimento(consulta.getTipoAtendimento());
+    return consultaRepository.save(consultaToEdit);
   }
 
   public Consulta removeConsulta(Long id) throws ConsultaNotFoundException {

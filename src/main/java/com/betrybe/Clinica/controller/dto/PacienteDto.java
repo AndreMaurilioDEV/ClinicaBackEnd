@@ -22,8 +22,8 @@ public record PacienteDto(Long id, String nome, String cpf, String telefone,
   public static PacienteDto fromEntity(Paciente paciente) {
     return new PacienteDto(
             paciente.getId(),
-            paciente.getCpf(),
             paciente.getNome(),
+            paciente.getCpf(),
             paciente.getTelefone(),
             paciente.getDate(),
             paciente.getEndereco(),

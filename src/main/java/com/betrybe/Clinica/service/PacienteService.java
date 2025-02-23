@@ -19,7 +19,7 @@ public class PacienteService {
     this.pacienteRepository = pacienteRepository;
   }
 
-  public List<Paciente> findAll() throws PacienteNotFoundException {
+  public List<Paciente> findAll() {
     return pacienteRepository.findAll();
   }
 
@@ -27,9 +27,8 @@ public class PacienteService {
     return pacienteRepository.findById(id).orElseThrow(PacienteNotFoundException::new);
   }
 
-  public Paciente createPaciente(Paciente paciente) throws PacienteNotFoundException,
-          PacienteAlreadyExistsException,
-          InvalidCpfException
+  public Paciente createPaciente(Paciente paciente) throws
+          PacienteAlreadyExistsException, InvalidCpfException
           {
 
     if(pacienteRepository.findBycpf(paciente.getCpf()).isPresent()) {

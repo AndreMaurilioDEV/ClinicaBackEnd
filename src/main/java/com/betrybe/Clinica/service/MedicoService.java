@@ -27,8 +27,7 @@ public class MedicoService {
     return medicoRepository.findById(id).orElseThrow(MedicoNotFoundException::new);
   }
 
-  public Medico createNewMedico(Medico medico) throws MedicoNotFoundException,
-          MedicoAlreadyExistsException, IOException {
+  public Medico createNewMedico(Medico medico) throws MedicoAlreadyExistsException {
 
     if(medicoRepository.findBycrm(medico.getCrm()).isPresent()) {
       throw new MedicoAlreadyExistsException();
@@ -36,6 +35,10 @@ public class MedicoService {
 
     if(medico.getNome() == null || medico.getNome().isEmpty()) {
       throw new IllegalArgumentException("Nome é obrigatório!");
+    }
+
+    if (!isCrmValid(medico.getCrm())) {
+      throw new IllegalArgumentException("CRM inválido");
     }
 
     return medicoRepository.save(medico);
