@@ -104,7 +104,7 @@ public class Person implements UserDetails {
     this.isConfirmed = isConfirmed;
   }
 
-    public String getName() {
+  public String getName() {
     return name;
   }
 
@@ -112,7 +112,7 @@ public class Person implements UserDetails {
     this.name = name;
   }
 
-    public LocalDateTime getCreatedAt() {
+  public LocalDateTime getCreatedAt() {
     return createdAt;
   }
 
@@ -130,7 +130,6 @@ public class Person implements UserDetails {
   public String getUsername() {
     return username;
   }
-
 
   @Override
   public boolean isAccountNonExpired() {

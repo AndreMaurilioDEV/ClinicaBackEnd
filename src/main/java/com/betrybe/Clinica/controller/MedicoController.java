@@ -4,8 +4,9 @@ import com.betrybe.Clinica.controller.dto.MedicoCreationDto;
 import com.betrybe.Clinica.controller.dto.MedicoDto;
 import com.betrybe.Clinica.entity.Medico;
 import com.betrybe.Clinica.service.MedicoService;
-import com.betrybe.Clinica.service.expections.MedicoNotFoundException;
-import org.apache.coyote.Response;
+import com.betrybe.Clinica.service.expections.MedicoExceptions.InvalidCrmException;
+import com.betrybe.Clinica.service.expections.MedicoExceptions.MedicoNotFoundException;
+import com.betrybe.Clinica.service.expections.NameEmptyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class MedicoController {
   }
 
   @GetMapping
-  public ResponseEntity<List<MedicoDto>> listAllMedicos() throws MedicoNotFoundException {
+  public ResponseEntity<List<MedicoDto>> listAllMedicos()  {
     List<Medico> allMedicos = medicoService.findAll();
     List<MedicoDto> medicoDtos = allMedicos.stream().map(MedicoDto::fromEntity).toList();
     return ResponseEntity.ok(medicoDtos);
@@ -39,16 +40,14 @@ public class MedicoController {
   }
 
   @PostMapping
-  public ResponseEntity<MedicoDto> createMedico(@RequestBody MedicoCreationDto medicoCreationDto)
-          throws MedicoNotFoundException, IOException {
+  public ResponseEntity<MedicoDto> createMedico(@RequestBody MedicoCreationDto medicoCreationDto) {
     Medico medico = medicoCreationDto.toEntity();
     Medico savedMedico = medicoService.createNewMedico(medico);
     return ResponseEntity.status(HttpStatus.CREATED).body(MedicoDto.fromEntity(savedMedico));
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Void> updateMedico(@PathVariable Long idMedico, @RequestBody MedicoCreationDto medicoCreationDto)
-    throws  MedicoNotFoundException {
+  public ResponseEntity<Void> updateMedico(@PathVariable Long idMedico, @RequestBody MedicoCreationDto medicoCreationDto) throws MedicoNotFoundException {
     medicoService.updateMedico(idMedico, medicoCreationDto.toEntity());
     return ResponseEntity.noContent().build();
   }

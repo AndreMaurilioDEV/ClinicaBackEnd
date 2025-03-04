@@ -5,14 +5,13 @@ import com.betrybe.Clinica.entity.Person;
 import com.betrybe.Clinica.repository.PersonRepository;
 import com.betrybe.Clinica.security.Role;
 import com.betrybe.Clinica.service.PersonService;
-import com.betrybe.Clinica.service.expections.PersonAlreadyExists;
-import com.betrybe.Clinica.service.expections.PersonNotFoundException;
+import com.betrybe.Clinica.service.expections.PersonExceptions.PersonAlreadyExists;
+import com.betrybe.Clinica.service.expections.PersonExceptions.PersonNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class PersonController {
   }
 
   @GetMapping
-  public ResponseEntity<List<PersonDto>> listAll() throws PersonNotFoundException {
+  public ResponseEntity<List<PersonDto>> listAll() {
     List<Person> allPersons = personService.findAll();
     List<PersonDto> personDtos = allPersons.stream().map(PersonDto::fromEntity).toList();
     return ResponseEntity.ok(personDtos);
@@ -52,8 +51,7 @@ public class PersonController {
   }
 
   @PostMapping("/employees")
-  public ResponseEntity<PersonDto> createNewEmployee(@RequestBody PersonCreationDto personCreationDto)
-          throws PersonAlreadyExists {
+  public ResponseEntity<PersonDto> createNewEmployee(@RequestBody PersonCreationDto personCreationDto) {
     Person person = personCreationDto.toEntity();
     Person savePerson = personService.createPerson(person, Role.EMPLOYEE);
     return ResponseEntity.status(HttpStatus.CREATED).body(PersonDto.fromEntity(savePerson));

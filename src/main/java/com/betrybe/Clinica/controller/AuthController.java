@@ -1,13 +1,12 @@
 package com.betrybe.Clinica.controller;
 
 import com.betrybe.Clinica.controller.dto.*;
-import com.betrybe.Clinica.entity.Person;
 import com.betrybe.Clinica.repository.PersonRepository;
 import com.betrybe.Clinica.service.PersonService;
 import com.betrybe.Clinica.service.TokenService;
-import com.betrybe.Clinica.service.expections.EmailNotFound;
-import com.betrybe.Clinica.service.expections.PersonNotFoundException;
-import org.apache.coyote.Response;
+import com.betrybe.Clinica.service.expections.EmailExceptions.EmailNotFound;
+import com.betrybe.Clinica.service.expections.PersonExceptions.PersonNotFoundException;
+import com.betrybe.Clinica.service.expections.RoleExceptions.RoleNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/auth")
@@ -45,7 +43,7 @@ public class AuthController {
     Authentication authentication = authenticationManager.authenticate(usernamePassword);
     String role = authentication.getAuthorities().stream()
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("Role não encontrada"))
+            .orElseThrow(RoleNotFound::new)
             .getAuthority();
     String token = tokenService.generateToken(authentication.getName(), role);
     return new TokenDto(token);

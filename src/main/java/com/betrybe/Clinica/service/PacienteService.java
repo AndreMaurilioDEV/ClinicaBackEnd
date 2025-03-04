@@ -3,8 +3,9 @@ package com.betrybe.Clinica.service;
 import com.betrybe.Clinica.entity.Paciente;
 import com.betrybe.Clinica.repository.PacienteRepository;
 import com.betrybe.Clinica.service.expections.InvalidCpfException;
-import com.betrybe.Clinica.service.expections.PacienteAlreadyExistsException;
-import com.betrybe.Clinica.service.expections.PacienteNotFoundException;
+import com.betrybe.Clinica.service.expections.PacienteExceptions.PacienteAlreadyExistsException;
+import com.betrybe.Clinica.service.expections.NameEmptyException;
+import com.betrybe.Clinica.service.expections.PacienteExceptions.PacienteNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class PacienteService {
   }
 
   public Paciente createPaciente(Paciente paciente) throws
-          PacienteAlreadyExistsException, InvalidCpfException
+          PacienteAlreadyExistsException, InvalidCpfException, NameEmptyException
           {
 
     if(pacienteRepository.findBycpf(paciente.getCpf()).isPresent()) {
@@ -36,7 +37,7 @@ public class PacienteService {
     }
 
     if(paciente.getNome() == null || paciente.getNome().isEmpty()) {
-      throw new IllegalArgumentException("Nome é obrigatório.");
+      throw new NameEmptyException();
     }
 
     paciente.setAtivo(true);

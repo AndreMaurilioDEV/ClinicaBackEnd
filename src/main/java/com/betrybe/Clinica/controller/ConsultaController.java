@@ -5,9 +5,10 @@ import com.betrybe.Clinica.entity.Consulta;
 import com.betrybe.Clinica.repository.MedicoRepository;
 import com.betrybe.Clinica.repository.PacienteRepository;
 import com.betrybe.Clinica.service.ConsultaService;
-import com.betrybe.Clinica.service.expections.ConsultaNotFoundException;
-import com.betrybe.Clinica.service.expections.MedicoNotFoundException;
-import com.betrybe.Clinica.service.expections.PacienteNotFoundException;
+import com.betrybe.Clinica.service.expections.ConsultaExceptions.ConsultaAlreadyExistisException;
+import com.betrybe.Clinica.service.expections.ConsultaExceptions.ConsultaNotFoundException;
+import com.betrybe.Clinica.service.expections.MedicoExceptions.MedicoNotFoundException;
+import com.betrybe.Clinica.service.expections.PacienteExceptions.PacienteNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,7 @@ public class ConsultaController {
 
   @PostMapping
   public ResponseEntity<ConsultaDto> createConsulta(@RequestBody ConsultaCreationDto consultaCreationDto) throws PacienteNotFoundException,
-          MedicoNotFoundException {
+          MedicoNotFoundException, ConsultaAlreadyExistisException {
     return ResponseEntity.status(HttpStatus.CREATED).body(ConsultaDto.fromEntity(consultaService.createConsulta(consultaCreationDto)));
   }
 

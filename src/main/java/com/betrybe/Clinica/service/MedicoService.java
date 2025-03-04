@@ -2,12 +2,13 @@ package com.betrybe.Clinica.service;
 
 import com.betrybe.Clinica.entity.Medico;
 import com.betrybe.Clinica.repository.MedicoRepository;
-import com.betrybe.Clinica.service.expections.MedicoAlreadyExistsException;
-import com.betrybe.Clinica.service.expections.MedicoNotFoundException;
+import com.betrybe.Clinica.service.expections.MedicoExceptions.InvalidCrmException;
+import com.betrybe.Clinica.service.expections.MedicoExceptions.MedicoAlreadyExistsException;
+import com.betrybe.Clinica.service.expections.MedicoExceptions.MedicoNotFoundException;
+import com.betrybe.Clinica.service.expections.NameEmptyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -19,26 +20,26 @@ public class MedicoService {
     this.medicoRepository = medicoRepository;
   }
 
-  public List<Medico> findAll() throws MedicoNotFoundException {
+  public List<Medico> findAll() {
     return medicoRepository.findAll();
   }
 
-  public Medico findById(Long id) throws MedicoNotFoundException {
+  public Medico findById(Long id) throws MedicoNotFoundException, NameEmptyException {
     return medicoRepository.findById(id).orElseThrow(MedicoNotFoundException::new);
   }
 
-  public Medico createNewMedico(Medico medico) throws MedicoAlreadyExistsException {
+  public Medico createNewMedico(Medico medico) throws MedicoAlreadyExistsException, InvalidCrmException {
 
     if(medicoRepository.findBycrm(medico.getCrm()).isPresent()) {
       throw new MedicoAlreadyExistsException();
     }
 
     if(medico.getNome() == null || medico.getNome().isEmpty()) {
-      throw new IllegalArgumentException("Nome é obrigatório!");
+      throw new NameEmptyException();
     }
 
     if (!isCrmValid(medico.getCrm())) {
-      throw new IllegalArgumentException("CRM inválido");
+      throw new InvalidCrmException();
     }
 
     return medicoRepository.save(medico);

@@ -5,8 +5,8 @@ import com.betrybe.Clinica.controller.dto.PacienteDto;
 import com.betrybe.Clinica.entity.Paciente;
 import com.betrybe.Clinica.service.PacienteService;
 import com.betrybe.Clinica.service.expections.InvalidCpfException;
-import com.betrybe.Clinica.service.expections.PacienteAlreadyExistsException;
-import com.betrybe.Clinica.service.expections.PacienteNotFoundException;
+import com.betrybe.Clinica.service.expections.PacienteExceptions.PacienteAlreadyExistsException;
+import com.betrybe.Clinica.service.expections.PacienteExceptions.PacienteNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class PacienteController {
   }
 
   @GetMapping
-  public ResponseEntity<List<PacienteDto>> listAllPacientes() throws PacienteNotFoundException {
+  public ResponseEntity<List<PacienteDto>> listAllPacientes() {
     List<Paciente> allPacientes = pacienteService.findAll();
     List<PacienteDto> pacienteDtos = allPacientes.stream().map(PacienteDto::fromEntity).toList();
     return ResponseEntity.ok(pacienteDtos);

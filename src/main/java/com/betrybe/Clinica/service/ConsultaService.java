@@ -8,16 +8,16 @@ import com.betrybe.Clinica.entity.Roles.Status;
 import com.betrybe.Clinica.repository.ConsultaRepository;
 import com.betrybe.Clinica.repository.MedicoRepository;
 import com.betrybe.Clinica.repository.PacienteRepository;
-import com.betrybe.Clinica.service.expections.ConsultaNotFoundException;
-import com.betrybe.Clinica.service.expections.MedicoNotFoundException;
-import com.betrybe.Clinica.service.expections.PacienteNotFoundException;
+import com.betrybe.Clinica.service.expections.ConsultaExceptions.ConsultaAlreadyExistisException;
+import com.betrybe.Clinica.service.expections.ConsultaExceptions.ConsultaNotFoundException;
+import com.betrybe.Clinica.service.expections.MedicoExceptions.MedicoNotFoundException;
+import com.betrybe.Clinica.service.expections.PacienteExceptions.PacienteNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ConsultaService {
@@ -45,11 +45,12 @@ public class ConsultaService {
   }
 
   public Consulta createConsulta(ConsultaCreationDto consultaDto)
-          throws MedicoNotFoundException, PacienteNotFoundException {
+          throws MedicoNotFoundException, PacienteNotFoundException, ConsultaAlreadyExistisException {
 
+    // Busca consulta por horário e data
     boolean exists = consultaRepository.existsByHorarioAndDateTime(consultaDto.horario(), consultaDto.date());
     if (exists) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Já existe um atendimento nesse horário e data");
+      throw new ConsultaAlreadyExistisException();
     }
     Consulta consulta = new Consulta();
     consulta.setHorario(consultaDto.horario());
