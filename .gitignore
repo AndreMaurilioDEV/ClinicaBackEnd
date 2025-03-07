@@ -1,11 +1,12 @@
 .env
 env
+.fastRequest
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.fastRequest
+
 
 ### STS ###
 .apt_generated
