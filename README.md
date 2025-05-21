@@ -144,11 +144,11 @@ A segurança da aplicação é garantida por meio de autenticação JWT (JSON We
 ### 🔹 Pacientes  
 | Método  | Endpoint             | Descrição                          |  
 |---------|----------------------|------------------------------------|  
-| POST    | `/paciente/criar`    | Cria um novo paciente              |  
-| GET     | `/paciente/acessar`  | Retorna um paciente específico     |  
-| GET     | `/paciente/listar`   | Lista todos os pacientes           |  
-| PUT     | `/paciente/editar`   | Edita um paciente                  |  
-| DELETE  | `/paciente/deletar`  | Deleta um paciente                 |  
+| POST    | `/paciente`          | Cria um novo paciente              |  
+| GET     | `/paciente/{id}`     | Retorna um paciente específico     |  
+| GET     | `/paciente/`         | Lista todos os pacientes           |  
+| PUT     | `/paciente/{id}`     | Edita um paciente                  |  
+| DELETE  | `/paciente/`         | Deleta um paciente                 |  
 
 ### 🔹 Médicos  
 | Método  | Endpoint            | Descrição                          |  
