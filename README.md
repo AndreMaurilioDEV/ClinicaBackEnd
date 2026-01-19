@@ -92,7 +92,7 @@ A segurança da aplicação é garantida por meio de autenticação JWT (JSON We
 
 ### 🔒 Requisitos Não Funcionais  
 1. **Linguagem**: O sistema será feito em Java utilizando o framework Spring Boot.  
-2. **Banco de dados**: O banco de dados será em PostgreSQL.   
+2. **Banco de dados**: O banco de dados será em MySQL.   
 3. **Desempenho**: O sistema deve responder rapidamente às solicitações dos usuários.  
 4. **Segurança**:  
    - Uso de JWT para autenticação.  
@@ -108,7 +108,7 @@ A segurança da aplicação é garantida por meio de autenticação JWT (JSON We
 ### 🔧 Pré-requisitos  
 - Java 11+  
 - Maven  
-- PostgreSQL  
+- MySQL  
 
 ### 📌 Passos  
 1. Configure as variáveis de ambiente criando um arquivo **.env** na raiz do projeto e preenchendo os valores conforme necessário:  
