@@ -136,10 +136,13 @@ A segurança da aplicação é garantida por meio de autenticação JWT (JSON We
 ## 🌐 Endpoints Principais  
 
 ### 🔹 Autenticação
-| Método  | Endpoint             | Descrição                          |  
-|---------|----------------------|------------------------------------|  
-| POST    | `/auth/login`        | Autentica um usuário               |  
-| POST    | `/auth/register`     | Registra um novo usuário           |  
+| Método  | Endpoint                    | Descrição                                            |  
+|---------|------------------------     |------------------------------------                  |  
+| POST    | `/auth/login`               | Autentica um usuário                                 |  
+| POST    | `/auth/forgot-password`     | Envia e-mail para redefinição de senha               | 
+| POST    | `/auth/validate-reset-token`| Redefine a senha usando o token recebido por e-mail  | 
+| POST    | `/auth/forgot-password`     | Altera a senha do usuário autenticado                | 
+ 
 
 ### 🔹 Pacientes  
 | Método  | Endpoint             | Descrição                          |  
@@ -171,11 +174,10 @@ A segurança da aplicação é garantida por meio de autenticação JWT (JSON We
 ### 🔹 Usuários  
 | Método  | Endpoint             | Descrição                          |  
 |---------|----------------------|------------------------------------|  
-| GET     | `/pessoas`           | Lista todos os usuários            |  
-| POST    | `/pessoas`           | Cria um novo usuário               |  
-| GET     | `/pessoas/{id}`      | Obtém detalhes de um usuário pelo ID |  
-| PUT     | `/pessoas/{id}`      | Atualiza um usuário existente       |  
-| DELETE  | `/pessoas/{id}`      | Remove um usuário                  |   
+| GET     | `/persons`           | Lista todos os usuários            |   
+| DELETE     | `/persons/{idPerson}`      | Remove um usuário pelo ID |  
+| GET     | `/persons/user-details/{username}`      | Obtém os dados do usuário pelo username (email)       |  
+| POST  | `/persons/employees`      | Cria um novo usuário com perfil EMPLOYEE                 |   
 
 ---
 
@@ -187,7 +189,6 @@ A segurança da aplicação é garantida por meio de autenticação JWT (JSON We
 - **Gerenciamento de Dependências:** Maven  
 
 ### 🔹 Banco de Dados  
-- **Banco de Dados Relacional:** PostgreSQL  
 - **ORM:** Spring Data JPA  
 
 ### 🔹 Segurança  
