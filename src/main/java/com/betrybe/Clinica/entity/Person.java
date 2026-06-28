@@ -34,6 +34,7 @@ public class Person implements UserDetails {
 
   private LocalDateTime lastResetRequest;
 
+
   public Person() {
   }
 
@@ -150,4 +151,5 @@ public class Person implements UserDetails {
   public boolean isEnabled() {
     return UserDetails.super.isEnabled();
   }
+
 }

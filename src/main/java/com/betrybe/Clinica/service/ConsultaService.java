@@ -98,5 +98,12 @@ public class ConsultaService {
     return consultaRepository.save(consulta);
   }
 
+  public Consulta updateStatusConsultaToFaltou(Long id) throws ConsultaNotFoundException {
+    Consulta consulta = findById(id);
+    consulta.setStatus(Status.FALTOU);
+    return consultaRepository.save(consulta);
+
+  }
+
 
 }

@@ -13,8 +13,8 @@ public class Paciente {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String cpf;
   private String nome;
+  private String cpf;
   private String telefone;
   private LocalDate date;
   private String endereco;
@@ -41,10 +41,10 @@ public class Paciente {
     this.dataCadastro = LocalDate.now();
   }
 
-  public Paciente( String cpf, String nome, String telefone, LocalDate date, String endereco, String estado, String cidade, String cep, String email,
+  public Paciente( String nome, String cpf, String telefone, LocalDate date, String endereco, String estado, String cidade, String cep, String email,
                   String numeroPlano, String planoDeSaude, Boolean ativo, Genero genero) {
-    this.cpf = cpf;
     this.nome = nome;
+    this.cpf = cpf;
     this.telefone = telefone;
     this.date = date;
     this.endereco = endereco;

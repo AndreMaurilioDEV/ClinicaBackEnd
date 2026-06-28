@@ -36,6 +36,7 @@ public class AdminService {
     person.setUsername(adminEmail);
     person.setPassword(passwordEncoder.encode(adminPassword));
     person.setRole(Role.ADMIN);
+    person.setIsConfirmed(true);
     personRepository.save(person);
     System.out.println("Usuário Admin criado com sucesso!");
   }

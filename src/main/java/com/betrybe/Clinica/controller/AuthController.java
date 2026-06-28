@@ -1,6 +1,7 @@
 package com.betrybe.Clinica.controller;
 
 import com.betrybe.Clinica.controller.dto.*;
+import com.betrybe.Clinica.entity.Person;
 import com.betrybe.Clinica.repository.PersonRepository;
 import com.betrybe.Clinica.service.PersonService;
 import com.betrybe.Clinica.service.TokenService;
@@ -37,7 +38,7 @@ public class AuthController {
 
   @PostMapping("/login")
   @ResponseStatus(HttpStatus.CREATED)
-  public TokenDto login(@RequestBody AuthDto authDto) {
+  public TokenDto login(@RequestBody AuthDto authDto) throws PersonNotFoundException {
     UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(
             authDto.username(), authDto.password());
     Authentication authentication = authenticationManager.authenticate(usernamePassword);
@@ -46,7 +47,8 @@ public class AuthController {
             .orElseThrow(RoleNotFound::new)
             .getAuthority();
     String token = tokenService.generateToken(authentication.getName(), role);
-    return new TokenDto(token);
+    Person person = personService.findByEmail(authentication.getName());
+    return new TokenDto(token, person.getIsConfirmed());
   }
 
   @PostMapping("/forgot-password")
@@ -62,9 +64,9 @@ public class AuthController {
   }
 
   @PutMapping("/change-password")
-  public ResponseEntity<Void> updatePassword(@RequestParam String email, @RequestParam String currentPassword, @RequestParam String newPassword)
+  public ResponseEntity<Void> updatePassword(@RequestBody ChangePasswordRequest request)
           throws PersonNotFoundException {
-    personService.updatePassword(email, newPassword, currentPassword);
+    personService.updatePassword(request.email(), request.newPassword(), request.currentPassword());
     return ResponseEntity.noContent().build();
   }
 
