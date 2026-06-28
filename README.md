@@ -1,216 +1,307 @@
-# Gerenciamento de Clínica - Back-End  
-**Repositório do Back-End:** [https://github.com/AndreMaurilioDEV/ClinicaBackEnd](https://github.com/AndreMaurilioDEV/ClinicaBackEnd)  
+# Clinica Back-End V2
 
----
+API REST para gerenciamento de uma clinica, desenvolvida em Java com Spring Boot. O sistema centraliza recursos de autenticacao, cadastro de pacientes, cadastro de medicos, agendamento de consultas e recuperacao de senha por e-mail.
 
-## 📌 Descrição
-Este projeto é uma API desenvolvida em Java com Spring Boot para gerenciar um sistema hospitalar. A API permite o cadastro, edição e exclusão de pacientes, médicos e consultas, além de fornecer autenticação segura e documentação interativa com Swagger.
+## Sumario
 
----
+- [Sobre o projeto](#sobre-o-projeto)
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Arquitetura do projeto](#arquitetura-do-projeto)
+- [Requisitos](#requisitos)
+- [Configuracao do ambiente](#configuracao-do-ambiente)
+- [Como executar](#como-executar)
+- [Documentacao da API](#documentacao-da-api)
+- [Endpoints principais](#endpoints-principais)
+- [Observacoes importantes](#observacoes-importantes)
 
-## 📂 Arquitetura e Organização  
+## Sobre o projeto
 
-### 🔹 Módulos Funcionais  
+Este back-end foi criado para atender os principais fluxos operacionais de uma clinica:
 
-#### 📌 Pacientes  
-- **dtos** → Possui DTOs de request e response para utilizar nos endpoints da Controller.  
-- **PacienteController.java** → Controla endpoints para criar, acessar, editar e deletar pacientes.  
-- **PacienteService.java** → Contém a lógica de negócios para manipular pacientes.  
-- **PacienteRepository.java** → Interface que interage com o banco de dados para salvar e recuperar pacientes.  
+- controle de pacientes;
+- controle de medicos;
+- criacao e acompanhamento de consultas;
+- autenticacao via JWT;
+- cadastro de colaboradores;
+- recuperacao e alteracao de senha;
+- documentacao interativa com Swagger/OpenAPI.
 
-#### 📌 Médicos  
-- **dtos** → Possui DTOs de request e response para utilizar nos endpoints da Controller.  
-- **MedicoController.java** → Gerencia os médicos da clínica.  
-- **MedicoService.java** → Processa os dados dos médicos e realiza operações como agendamento de consultas.  
-- **MedicoRepository.java** → Interface para acesso ao banco de dados.  
+A aplicacao utiliza Spring Security com sessao stateless, persistencia com Spring Data JPA e banco de dados MySQL.
 
-#### 📌 Consultas  
-- **dtos** → Possui DTOs de request e response para utilizar nos endpoints da Controller.  
-- **ConsultaController.java** → Permite operações de CRUD sobre consultas.  
-- **ConsultaService.java** → Processa as consultas e as associa a pacientes e médicos.  
-- **ConsultaRepository.java** → Interage com o banco de dados para armazenar as consultas.  
+## Funcionalidades
 
-#### 📌 Usuários  
-- **dtos** → Possui DTOs de request e response para utilizar nos endpoints da Controller.  
-- **UsuarioController.java** → Gerencia o cadastro, autenticação e recuperação de senha.  
-- **UsuarioService.java** → Lida com a lógica de criação e edição de usuários.  
-- **UsuarioRepository.java** → Repositório de persistência dos dados dos usuários.  
+- Login com emissao de token JWT.
+- Criacao automatica de usuario administrador na inicializacao.
+- Cadastro, listagem, consulta, edicao, exclusao e atualizacao de status de pacientes.
+- Cadastro, listagem, consulta, edicao e exclusao de medicos.
+- Cadastro, listagem, consulta, exclusao e atualizacao de status de consultas.
+- Cadastro de colaboradores por usuario administrador.
+- Recuperacao de senha por e-mail.
+- Validacao de token de redefinicao de senha.
+- Tratamento centralizado de excecoes.
+- Documentacao da API via Swagger UI.
 
-#### 📌 Infraestrutura e Utilitários  
-- **application.properties** → Arquivo de configuração contendo informações sobre banco de dados, segurança e outras propriedades da aplicação.  
-- **CustomizedResponseEntityException.java** e **ExceptionResponse.java** → Controla o tratamento de exceções e respostas personalizadas de erro.  
-- **EmailService.java** → Serviço para envio de e-mails automáticos, incluindo confirmação de conta e recuperação de senha.  
+## Tecnologias
 
----
+- Java 17
+- Spring Boot 3.3.2
+- Spring Web
+- Spring Data JPA
+- Spring Security
+- JWT com `java-jwt`
+- MySQL
+- Spring Mail
+- Bean Validation
+- Springdoc OpenAPI
+- Maven
+- Dotenv Java
+- JUnit/Spring Boot Test
 
-### 🔹 Segurança  
-A segurança da aplicação é garantida por meio de autenticação JWT (JSON Web Token) e configurações personalizadas no Spring Security. Abaixo estão os principais componentes e funcionalidades:  
+## Arquitetura do projeto
 
-#### 📌 Token JWT  
-- **TokenService.java**: Responsável por gerar e validar tokens JWT.  
-  - **Métodos Principais**:  
-    - `generateToken`: Gera um token JWT com base nos dados do usuário.  
-    - `validateToken`: Valida um token JWT e retorna o nome de usuário (subject) contido no token.  
-  - **Link do Código**: [TokenService.java](https://github.com/AndreMaurilioDEV/ClinicaBackEnd/blob/main/src/main/java/com/betrybe/Clinica/service/TokenService.java)  
+```text
+src/main/java/com/betrybe/Clinica
+|-- advice/          # Tratamento global de excecoes
+|-- controller/      # Controllers REST
+|-- controller/dto/  # DTOs de entrada e saida
+|-- doc/             # Configuracao do OpenAPI/Swagger
+|-- entity/          # Entidades JPA e enums de dominio
+|-- repository/      # Repositorios Spring Data JPA
+|-- security/        # Configuracoes de seguranca, roles e filtro JWT
+|-- service/         # Regras de negocio
+|-- AdminInitializer.java
+|-- HospitalExampleApplication.java
+```
 
-#### 📌 Configurações de Segurança  
-- **Pacote Security**: Contém as configurações de segurança da aplicação.  
-  - **SecurityConfig.java**: Configura as permissões de acesso, autenticação JWT e filtros de segurança.  
-  - **SecurityFilter.java**: Filtro personalizado para validar tokens JWT em cada requisição.  
-  - **Link do Código**: [Pacote Security](https://github.com/AndreMaurilioDEV/ClinicaBackEnd/tree/main/src/main/java/com/betrybe/Clinica/security)  
+## Requisitos
 
-#### 📌 Autenticação e Autorização  
-- **Autenticação**:  
-  - Os usuários se autenticam fornecendo credenciais (e-mail e senha) no endpoint `/auth/login`.  
-  - Um token JWT é gerado e retornado para o cliente após a autenticação bem-sucedida.  
-- **Autorização**:  
-  - O token JWT deve ser enviado no cabeçalho `Authorization` das requisições para acessar endpoints protegidos.  
-  - O filtro de segurança valida o token e permite ou nega o acesso com base nas permissões configuradas.  
+Antes de executar o projeto, tenha instalado:
 
-#### 📌 Fluxo de Segurança  
-1. O usuário faz login no endpoint `/auth/login`.  
-2. O sistema gera um token JWT e o retorna ao cliente.  
-3. O cliente envia o token no cabeçalho `Authorization` das requisições subsequentes.  
-4. O filtro de segurança valida o token e permite o acesso aos recursos protegidos.  
+- Java 17 ou superior
+- Maven ou Maven Wrapper incluido no projeto
+- MySQL em execucao local
 
-## 📋 Requisitos do Sistema  
+Por padrao, a aplicacao usa o banco:
 
-### ✅ Requisitos Funcionais  
-1. **Autenticação e autorização**: O sistema deve possuir autenticação de usuários via JWT.  
-2. **Cadastro e gerenciamento de usuários**:  
-   - Criar um novo usuário manualmente pelo sistema.  
-   - Recuperar a senha utilizando um código enviado por e-mail.  
-   - Alterar a senha com base no código de recuperação.  
-3. **Cadastro de pacientes**: Criar, editar e excluir pacientes.  
-4. **Cadastro de médicos**: Criar, editar e excluir médicos, com especialidades e horários de atendimento.  
-5. **Agendamento de consultas**: Permitir o agendamento de consultas entre pacientes e médicos.  
-6. **Relatórios**: Gerar relatórios de consultas por médico, paciente ou período.  
-7. **Tratamento de exceções**: O sistema deve possuir tratamento de exceções com respostas personalizadas.  
-8. **Testes de integração**: Deve realizar testes automatizados para garantir a estabilidade do sistema.  
+```text
+hospitaldb
+```
 
----
+A URL configurada cria o banco automaticamente caso ele ainda nao exista:
 
-### 🔒 Requisitos Não Funcionais  
-1. **Linguagem**: O sistema será feito em Java utilizando o framework Spring Boot.  
-2. **Banco de dados**: O banco de dados será em PostgreSQL.   
-3. **Desempenho**: O sistema deve responder rapidamente às solicitações dos usuários.  
-4. **Segurança**:  
-   - Uso de JWT para autenticação.  
-   - Senhas devem ser armazenadas criptografadas utilizando BCrypt ou equivalente.  
-5. **Testes Automatizados**: O sistema deve ser validado através de testes automatizados utilizando:  
-   - JUnit → Para testes unitários das regras de negócio.  
-   - Mockito → Para criação de objetos mock e simulação de dependências durante os testes.  
+```properties
+jdbc:mysql://localhost:3306/hospitaldb?createDatabaseIfNotExist=true
+```
 
----
+## Configuracao do ambiente
 
-## 🚀 Como Executar  
+Crie um arquivo `.env` na raiz do projeto com as variaveis abaixo:
 
-### 🔧 Pré-requisitos  
-- Java 11+  
-- Maven  
-- PostgreSQL  
+```env
+SPRING_USERNAME=seu_usuario_mysql
+SPRING_PASSWORD=sua_senha_mysql
 
-### 📌 Passos  
-1. Configure as variáveis de ambiente criando um arquivo **.env** na raiz do projeto e preenchendo os valores conforme necessário:  
-   ```plaintext
-   # Configuração do Banco de Dados
-   DB_USERNAME=postgres
-   DB_PASSWORD=sua_senha
+JWT_SECRET=sua_chave_secreta_jwt
 
-   # Chaves JWT para autenticação
-   JWT_PUBLIC_KEY=
-   JWT_PRIVATE_KEY=
+MAIL_USERNAME=seu_email@gmail.com
+MAIL_PASSWORD=sua_senha_ou_app_password
 
-   # Chave de API para segurança
-   API_KEY=
+ADMIN_NAME=Administrador
+ADMIN_EMAIL=admin@clinica.com
+ADMIN_PASSWORD=senha_admin
+```
 
-   # Configuração de E-mail (Envio de notificações)
-   ADMIN_EMAIL=
-   EMAIL_COMUNICACAO=
-   SENHA_EMAIL_COMUNICACAO=
+Essas variaveis sao carregadas na inicializacao da aplicacao por meio do `Dotenv`.
 
-   # Execute os comandos
-   ./mvnw spring-boot:run
+## Como executar
 
+Na raiz do projeto, execute:
 
-## 🌐 Endpoints Principais  
+```bash
+./mvnw spring-boot:run
+```
 
-### 🔹 Autenticação
-| Método  | Endpoint             | Descrição                          |  
-|---------|----------------------|------------------------------------|  
-| POST    | `/auth/login`        | Autentica um usuário               |  
-| POST    | `/auth/register`     | Registra um novo usuário           |  
+No Windows:
 
-### 🔹 Pacientes  
-| Método  | Endpoint             | Descrição                          |  
-|---------|----------------------|------------------------------------|  
-| POST    | `/paciente`          | Cria um novo paciente              |  
-| GET     | `/paciente/{id}`     | Retorna um paciente específico     |  
-| GET     | `/paciente/`         | Lista todos os pacientes           |  
-| PUT     | `/paciente/{id}`     | Edita um paciente                  |  
-| DELETE  | `/paciente/`         | Deleta um paciente                 |  
+```bash
+mvnw.cmd spring-boot:run
+```
 
-### 🔹 Médicos  
-| Método  | Endpoint            | Descrição                          |  
-|---------|---------------------|------------------------------------|  
-| POST    | `/medico/criar`     | Cria um novo médico                |  
-| GET     | `/medico/acessar`   | Retorna um médico específico       |  
-| GET     | `/medico/listar`    | Lista todos os médicos             |  
-| PUT     | `/medico/editar`    | Edita um médico                    |  
-| DELETE  | `/medico/deletar`   | Deleta um médico                   |  
+Depois de iniciar, a API ficara disponivel em:
 
-### 🔹 Consultas  
-| Método  | Endpoint             | Descrição                          |  
-|---------|----------------------|------------------------------------|  
-| POST    | `/consulta/criar`    | Agenda uma nova consulta           |  
-| GET     | `/consulta/acessar`  | Retorna uma consulta específica    |  
-| GET     | `/consulta/listar`   | Lista todas as consultas           |  
-| PUT     | `/consulta/editar`   | Edita uma consulta                 |  
-| DELETE  | `/consulta/deletar`  | Deleta uma consulta                |  
+```text
+http://localhost:8080
+```
 
-### 🔹 Usuários  
-| Método  | Endpoint             | Descrição                          |  
-|---------|----------------------|------------------------------------|  
-| GET     | `/pessoas`           | Lista todos os usuários            |  
-| POST    | `/pessoas`           | Cria um novo usuário               |  
-| GET     | `/pessoas/{id}`      | Obtém detalhes de um usuário pelo ID |  
-| PUT     | `/pessoas/{id}`      | Atualiza um usuário existente       |  
-| DELETE  | `/pessoas/{id}`      | Remove um usuário                  |   
+## Documentacao da API
 
----
+Com a aplicacao em execucao, acesse:
 
-## 📜 Tecnologias Utilizadas  
+```text
+http://localhost:8080/swagger-ui.html
+```
 
-### 🔹 Back-End  
-- **Linguagem:** Java  
-- **Framework:** Spring Boot  
-- **Gerenciamento de Dependências:** Maven  
+ou:
 
-### 🔹 Banco de Dados  
-- **Banco de Dados Relacional:** PostgreSQL  
-- **ORM:** Spring Data JPA  
+```text
+http://localhost:8080/swagger-ui/index.html
+```
 
-### 🔹 Segurança  
-- **Autenticação:** Spring Security  
-- **Autenticação via Terceiros:** JWT  
-- **Token de Segurança:** JWT (JSON Web Token)  
-- **Criptografia de Senhas:** BCrypt  
+A especificacao OpenAPI fica disponivel em:
 
-### 🔹 Infraestrutura e DevOps  
-- **Containerização:** Docker  
-- **Gerenciamento de Containers:** Docker Compose  
-- **Administração do Banco de Dados:** Admin   
+```text
+http://localhost:8080/v3/api-docs
+```
 
-### 🔹 Testes Automatizados  
-- **Testes Unitários e de Integração:** JUnit  
-- **Mock de Dependências:** Mockito  
-- **Testes de Segurança:** Spring Security Test  
+## Endpoints principais
 
-### 🔹 Outras Bibliotecas e Utilitários   
-- **Envio de E-mails:** Spring Mail  
-- **Logs e Monitoramento:** Spring Boot Actuator
+### Autenticacao
 
----
+| Metodo | Endpoint | Descricao | Acesso |
+| --- | --- | --- | --- |
+| POST | `/auth/login` | Autentica usuario e retorna token JWT | Publico |
+| POST | `/auth/forgot-password` | Solicita redefinicao de senha por e-mail | Publico |
+| POST | `/auth/reset-password` | Redefine senha usando token | Publico |
+| POST | `/auth/validate-reset-token` | Valida token de redefinicao | Publico |
+| PUT | `/auth/change-password` | Altera senha do usuario | Autenticado |
 
-Criado por André Maurilio
+### Pessoas e colaboradores
 
+| Metodo | Endpoint | Descricao | Acesso |
+| --- | --- | --- | --- |
+| GET | `/persons` | Lista usuarios cadastrados | Autenticado |
+| GET | `/persons/user-details/{username}` | Busca usuario por e-mail/username | `ROLE_EMPLOYEE` |
+| POST | `/persons/employees` | Cadastra novo colaborador | `ROLE_ADMIN` |
+| DELETE | `/persons/{idPerson}` | Remove usuario | Autenticado |
+
+### Pacientes
+
+| Metodo | Endpoint | Descricao | Acesso |
+| --- | --- | --- | --- |
+| GET | `/pacientes` | Lista todos os pacientes | Autenticado |
+| GET | `/pacientes/{idPaciente}` | Busca paciente por ID | Autenticado |
+| POST | `/pacientes` | Cadastra paciente | Autenticado |
+| PUT | `/pacientes/{idPaciente}` | Atualiza paciente | Autenticado |
+| DELETE | `/pacientes/{idPaciente}` | Remove paciente | Autenticado |
+| PUT | `/pacientes/status-update/{idPaciente}` | Atualiza status do paciente | Autenticado |
+
+### Medicos
+
+| Metodo | Endpoint | Descricao | Acesso |
+| --- | --- | --- | --- |
+| GET | `/medicos` | Lista todos os medicos | Autenticado |
+| GET | `/medicos/{idMedico}` | Busca medico por ID | Autenticado |
+| POST | `/medicos` | Cadastra medico | Autenticado |
+| PUT | `/medicos/{id}` | Atualiza medico | Autenticado |
+| DELETE | `/medicos/{id}` | Remove medico | Autenticado |
+
+### Consultas
+
+| Metodo | Endpoint | Descricao | Acesso |
+| --- | --- | --- | --- |
+| GET | `/consultas` | Lista todas as consultas | Autenticado |
+| GET | `/consultas/{consultaId}` | Busca consulta por ID | Autenticado |
+| POST | `/consultas` | Agenda nova consulta | Autenticado |
+| DELETE | `/consultas/{idConsulta}` | Remove consulta | Autenticado |
+| PUT | `/consultas/status-consulta/{idConsulta}` | Atualiza status da consulta | Autenticado |
+
+## Exemplos de payload
+
+### Login
+
+```json
+{
+  "username": "admin@clinica.com",
+  "password": "senha_admin"
+}
+```
+
+### Cadastro de paciente
+
+```json
+{
+  "nome": "Maria Silva",
+  "cpf": "12345678909",
+  "telefone": "11999999999",
+  "date": "1990-05-20",
+  "endereco": "Rua Exemplo, 100",
+  "estado": "SP",
+  "cidade": "Sao Paulo",
+  "cep": "01001000",
+  "email": "maria@email.com",
+  "planoDeSaude": "Plano Clinico",
+  "numeroPlano": "ABC123",
+  "ativo": true,
+  "genero": "FEMININO"
+}
+```
+
+### Cadastro de medico
+
+```json
+{
+  "nome": "Dr. Carlos Souza",
+  "crm": "123456",
+  "cpf": "98765432100",
+  "especialidadeMedica": "CARDIOLOGIA",
+  "date": "1985-08-15"
+}
+```
+
+### Agendamento de consulta
+
+```json
+{
+  "horario": "14:30:00",
+  "date": "2026-07-10",
+  "medicoIds": 1,
+  "pacienteIds": 1,
+  "status": "AGENDADA",
+  "tipoAtendimento": "CONSULTA"
+}
+```
+
+## Variaveis de configuracao
+
+| Variavel | Descricao |
+| --- | --- |
+| `SPRING_USERNAME` | Usuario do banco MySQL |
+| `SPRING_PASSWORD` | Senha do banco MySQL |
+| `JWT_SECRET` | Chave usada para assinar tokens JWT |
+| `MAIL_USERNAME` | Conta de e-mail usada pelo Spring Mail |
+| `MAIL_PASSWORD` | Senha ou app password do e-mail |
+| `ADMIN_NAME` | Nome do administrador inicial |
+| `ADMIN_EMAIL` | E-mail do administrador inicial |
+| `ADMIN_PASSWORD` | Senha do administrador inicial |
+
+## Observacoes importantes
+
+- O projeto esta configurado para aceitar requisicoes CORS de `http://localhost:5173`, porta comum de projetos front-end com Vite.
+- A configuracao atual usa `spring.jpa.hibernate.ddl-auto=create`. Isso recria as tabelas ao iniciar a aplicacao e pode apagar dados existentes. Para ambientes com dados importantes, altere para `update`, `validate` ou use migrations.
+- A maioria das rotas exige token JWT no header:
+
+```http
+Authorization: Bearer seu_token_jwt
+```
+
+- O banco configurado no projeto e MySQL.
+- O usuario administrador e criado automaticamente na inicializacao a partir das variaveis `ADMIN_NAME`, `ADMIN_EMAIL` e `ADMIN_PASSWORD`.
+
+## Testes
+
+Para executar os testes:
+
+```bash
+./mvnw test
+```
+
+No Windows:
+
+```bash
+mvnw.cmd test
+```
+
+## Status do projeto
+
+Projeto em desenvolvimento, com foco em evoluir os fluxos de gestao clinica, seguranca, agendamento e integracao com o front-end em pt-BR.
