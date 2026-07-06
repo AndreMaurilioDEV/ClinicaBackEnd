@@ -8,6 +8,8 @@ import com.betrybe.Clinica.service.TokenService;
 import com.betrybe.Clinica.service.expections.EmailExceptions.EmailNotFound;
 import com.betrybe.Clinica.service.expections.PersonExceptions.PersonNotFoundException;
 import com.betrybe.Clinica.service.expections.RoleExceptions.RoleNotFound;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +40,7 @@ public class AuthController {
 
   @PostMapping("/login")
   @ResponseStatus(HttpStatus.CREATED)
-  public TokenDto login(@RequestBody AuthDto authDto) throws PersonNotFoundException {
+  public LoginResponse login(@RequestBody AuthDto authDto, HttpServletResponse response) throws PersonNotFoundException {
     UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(
             authDto.username(), authDto.password());
     Authentication authentication = authenticationManager.authenticate(usernamePassword);
@@ -47,8 +49,19 @@ public class AuthController {
             .orElseThrow(RoleNotFound::new)
             .getAuthority();
     String token = tokenService.generateToken(authentication.getName(), role);
+
     Person person = personService.findByEmail(authentication.getName());
-    return new TokenDto(token, person.getIsConfirmed());
+
+    Cookie cookie = new Cookie("access_token", token);
+
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(60 * 15);
+
+    response.addCookie(cookie);
+
+    return new LoginResponse(person.getIsConfirmed());
   }
 
   @PostMapping("/forgot-password")

@@ -4,6 +4,7 @@ import com.betrybe.Clinica.service.PersonService;
 import com.betrybe.Clinica.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +30,21 @@ public class jwtFilter extends OncePerRequestFilter {
   }
 
   private Optional<String> extractToken(HttpServletRequest request) {
-    String authHeader = request.getHeader("Authorization");
 
-    if (authHeader == null) {
+    Cookie[] cookies = request.getCookies();
+
+    if (cookies == null) {
       return Optional.empty();
     }
 
-    return Optional.of(
-            authHeader.replace("Bearer ", "")
-    );
+    for (Cookie cookie : cookies) {
+
+      if ("access_token".equals(cookie.getName())) {
+        return Optional.of(cookie.getValue());
+      }
+    }
+
+    return Optional.empty();
   }
 
   @Override
@@ -62,10 +69,6 @@ public class jwtFilter extends OncePerRequestFilter {
               userDetails, null, userDetails.getAuthorities());
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-
-    response.setHeader("Access-Control-Allow-Origin", "*");
-    response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
     filterChain.doFilter(request, response);
   }
