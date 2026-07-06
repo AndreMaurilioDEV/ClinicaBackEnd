@@ -10,6 +10,7 @@ import com.betrybe.Clinica.service.expections.PersonExceptions.PersonNotFoundExc
 import com.betrybe.Clinica.service.expections.RoleExceptions.RoleNotFound;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,5 +88,26 @@ public class AuthController {
   public ResponseEntity<Void> validateResetToken(@RequestBody ResetTokenRequestDto request) {
     personService.validateTokenReset(request.token());
     return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("access_token", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+
+        return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/me")
+  public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) throws PersonNotFoundException {
+    String username = authentication.getName();
+    Person person = personService.findByEmail(username);
+    UserDto userDto = UserDto.fromEntity(person);
+    return ResponseEntity.ok(userDto);
   }
 }
